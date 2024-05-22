@@ -2,6 +2,10 @@ package com.garden.back.docs.report;
 
 import com.garden.back.docs.RestDocsSupport;
 import com.garden.back.report.ReportController;
+import com.garden.back.report.domain.comment.CommentReportType;
+import com.garden.back.report.domain.crop.CropPostReportType;
+import com.garden.back.report.domain.garden.GardenReportType;
+import com.garden.back.report.domain.post.PostReportType;
 import com.garden.back.report.request.ReportCommentRequest;
 import com.garden.back.report.request.ReportGardenRequest;
 import com.garden.back.report.request.ReportPostRequest;
@@ -9,6 +13,9 @@ import com.garden.back.report.service.ReportService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -41,10 +48,10 @@ class ReportRestDocsTest extends RestDocsSupport {
         ReportGardenRequest request = sut.giveMeBuilder(ReportGardenRequest.class)
             .set("content", "허위로 등록된 텃밭 입니디.")
             .set("reportType", "FAKED_SALE")
-                .sample();
+            .sample();
         mockMvc.perform(post("/v1/reports/gardens/{gardenId}", gardenId)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
             .andDo(print())
             .andDo(document("report-garden",
@@ -53,7 +60,10 @@ class ReportRestDocsTest extends RestDocsSupport {
                 ),
                 requestFields(
                     fieldWithPath("content").type(STRING).description("신고 내용"),
-                    fieldWithPath("reportType").type(STRING).description("신고 타입(FAKED_SALE,SPAMMING, SWEAR_WORD, SENSATIONAL, PERSONAL_INFORMATION_EXPOSURE, COMMENTS) 중 하나만 가능)")
+                    fieldWithPath("reportType").type(STRING)
+                        .description("신고타입:"+Arrays.stream(GardenReportType.values())
+                            .map(type -> type.name() + " : " + type.getDescription())
+                            .collect(Collectors.joining(", ")))
                 ),
                 responseHeaders(
                     headerWithName("Location").description("생성된 신고의 id를 포함한 url")
@@ -77,7 +87,10 @@ class ReportRestDocsTest extends RestDocsSupport {
                     parameterWithName("commentId").description("댓글 id")
                 ),
                 requestFields(
-                    fieldWithPath("reportType").type(STRING).description("신고 타입(SPAMMING, SWEAR_WORD, SENSATIONAL, PERSONAL_INFORMATION_EXPOSURE, OFFENSIVE_EXPRESSION) 중 하나만 가능)")
+                    fieldWithPath("reportType").type(STRING)
+                        .description("신고 타입:"+Arrays.stream(CommentReportType.values())
+                            .map(type -> type.name() + " : " + type.getDescription())
+                            .collect(Collectors.joining(", ")))
                 ),
                 responseHeaders(
                     headerWithName("Location").description("생성된 신고의 id를 포함한 url")
@@ -101,7 +114,9 @@ class ReportRestDocsTest extends RestDocsSupport {
                     parameterWithName("postId").description("게시글 id")
                 ),
                 requestFields(
-                    fieldWithPath("reportType").type(STRING).description("신고 타입(SPAMMING, SWEAR_WORD, SENSATIONAL, PERSONAL_INFORMATION_EXPOSURE, OFFENSIVE_EXPRESSION) 중 하나만 가능)")
+                    fieldWithPath("reportType").type(STRING).description("신고 타입:"+Arrays.stream(PostReportType.values())
+                        .map(type -> type.name() + " : " + type.getDescription())
+                        .collect(Collectors.joining(", ")))
                 ),
                 responseHeaders(
                     headerWithName("Location").description("생성된 신고의 id를 포함한 url")
@@ -125,7 +140,9 @@ class ReportRestDocsTest extends RestDocsSupport {
                     parameterWithName("cropPostId").description("작물 게시글 id")
                 ),
                 requestFields(
-                    fieldWithPath("reportType").type(STRING).description("신고 타입(SPAMMING, SWEAR_WORD, SENSATIONAL, PERSONAL_INFORMATION_EXPOSURE, OFFENSIVE_EXPRESSION) 중 하나만 가능)")
+                    fieldWithPath("reportType").type(STRING).description("신고 타입:"+Arrays.stream(CropPostReportType.values())
+                        .map(type -> type.name() + " : " + type.getDescription())
+                        .collect(Collectors.joining(", ")))
                 ),
                 responseHeaders(
                     headerWithName("Location").description("생성된 신고의 id를 포함한 url")

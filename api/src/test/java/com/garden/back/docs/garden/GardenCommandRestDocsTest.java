@@ -40,17 +40,18 @@ class GardenCommandRestDocsTest extends RestDocsSupport {
     @DisplayName("텃밭을 찜할 수 있다.")
     @Test
     void createLikeGarden() throws Exception {
-        GardenLikeCreateRequest gardenLikeCreateRequest = GardenFixture.gardenLikeCreateRequest();
         given(gardenCommandService.createGardenLike(any())).willReturn(1L);
 
-        mockMvc.perform(post("/v2/gardens/likes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(gardenLikeCreateRequest)))
+        mockMvc.perform(post("/v2/gardens/{gardenId}/likes",1L)
+                .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isCreated())
             .andDo(document("create-like-garden",
-                requestFields(
-                    fieldWithPath("gardenId").type(JsonFieldType.NUMBER).description("찜하고자 하는 텃밭 아이디")
+                pathParameters(
+                    parameterWithName("gardenId").description("해당 텃밭 게시글의 ID")
+                ),
+                responseFields(
+                    fieldWithPath("gardenLikeId").type(JsonFieldType.NUMBER).description("텃밭의 찜하기 ID")
                 ),
                 responseHeaders(
                     headerWithName("Location").description("생성된 찜한 텃밭의 id를 포함한 url")
@@ -60,16 +61,13 @@ class GardenCommandRestDocsTest extends RestDocsSupport {
     @DisplayName("텃밭을 삭제할 수 있다.")
     @Test
     void deleteLikeGarden() throws Exception {
-        GardenLikeDeleteRequest gardenLikeDeleteRequest = GardenFixture.gardenLikeDeleteRequest();
-
-        mockMvc.perform(delete("/v2/gardens/likes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(gardenLikeDeleteRequest)))
+        mockMvc.perform(delete("/v2/gardens/likes/{gardenLikeId}",1L)
+                .contentType(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isOk())
             .andDo(document("delete-like",
-                requestFields(
-                    fieldWithPath("gardenId").type(JsonFieldType.NUMBER).description("찜하기를 취소하고자 하는 텃밭 아이디")
+                pathParameters(
+                    parameterWithName("gardenLikeId").description("텃밭 찜하기 ID")
                 )));
     }
 
@@ -107,7 +105,7 @@ class GardenCommandRestDocsTest extends RestDocsSupport {
                     requestPartFields("gardenCreateRequest",
                         fieldWithPath("gardenName").type(JsonFieldType.STRING).description("등록하는 텃밭 이름"),
                         fieldWithPath("price").type(JsonFieldType.STRING).description("텃밭 분양 가격"),
-                        fieldWithPath("size").type(JsonFieldType.STRING).description("텃밭 분양 크기"),
+                        fieldWithPath("size").type(JsonFieldType.STRING).description("텃밭 분양 크기(m²)"),
                         fieldWithPath("gardenStatus").type(JsonFieldType.STRING).description("텃밭 상태 : ACTIVE(모집중), INACTIVE(마감)"),
                         fieldWithPath("contact").type(JsonFieldType.STRING).description("연락처"),
                         fieldWithPath("address").type(JsonFieldType.STRING).description("텃밭 주소"),
@@ -174,7 +172,7 @@ class GardenCommandRestDocsTest extends RestDocsSupport {
                     fieldWithPath("remainGardenImageUrls").type(JsonFieldType.ARRAY).description("남아있는 이미지 url들"),
                     fieldWithPath("gardenName").type(JsonFieldType.STRING).description("등록하는 텃밭 이름"),
                     fieldWithPath("price").type(JsonFieldType.STRING).description("텃밭 분양 가격"),
-                    fieldWithPath("size").type(JsonFieldType.STRING).description("텃밭 분양 크기"),
+                    fieldWithPath("size").type(JsonFieldType.STRING).description("텃밭 분양 크기(m²)"),
                     fieldWithPath("gardenStatus").type(JsonFieldType.STRING).description("텃밭 상태 : ACTIVE(모집중), INACTIVE(마감)"),
                     fieldWithPath("gardenType").type(JsonFieldType.STRING).description("텃밭 타입 : PRIVATE(민간), PUBLIC(공공)"),
                     fieldWithPath("contact").type(JsonFieldType.STRING).description("연락처"),

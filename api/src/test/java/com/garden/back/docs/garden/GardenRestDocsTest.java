@@ -82,7 +82,7 @@ class GardenRestDocsTest extends RestDocsSupport {
                     fieldWithPath("gardenGetAllResponses[].gardenName").type(JsonFieldType.STRING).description("텃밭 이름"),
                     fieldWithPath("gardenGetAllResponses[].gardenType").type(JsonFieldType.STRING).description("텃밭 타입 : PRIVATE(민간), PUBLIC(공공)"),
                     fieldWithPath("gardenGetAllResponses[].price").type(JsonFieldType.STRING).description("텃밭 가격"),
-                    fieldWithPath("gardenGetAllResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기"),
+                    fieldWithPath("gardenGetAllResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기(m²)"),
                     fieldWithPath("gardenGetAllResponses[].gardenStatus").type(JsonFieldType.STRING).description("텃밭 상태 : ACTIVE(모집중), INACTIVE(마감)"),
                     fieldWithPath("gardenGetAllResponses[].images").type(JsonFieldType.ARRAY).description("텃밭 이미지"),
                     fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부")
@@ -117,7 +117,7 @@ class GardenRestDocsTest extends RestDocsSupport {
                 responseFields(
                     fieldWithPath("gardenByComplexesResponses").type(JsonFieldType.ARRAY).description("위치 및 타입에 따른 텃밭 검색"),
                     fieldWithPath("gardenByComplexesResponses[].gardenId").type(JsonFieldType.NUMBER).description("텃밭 아이디"),
-                    fieldWithPath("gardenByComplexesResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기"),
+                    fieldWithPath("gardenByComplexesResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기(m²)"),
                     fieldWithPath("gardenByComplexesResponses[].gardenName").type(JsonFieldType.STRING).description("텃밭 이름"),
                     fieldWithPath("gardenByComplexesResponses[].price").type(JsonFieldType.STRING).description("텃밭 가격"),
                     fieldWithPath("gardenByComplexesResponses[].images").type(JsonFieldType.ARRAY).description("텃밭 이미지"),
@@ -152,7 +152,7 @@ class GardenRestDocsTest extends RestDocsSupport {
                     fieldWithPath("gardenType").type(JsonFieldType.STRING).description("텃밭 타입 : PRIVATE(민간), PUBLIC(공공)"),
                     fieldWithPath("price").type(JsonFieldType.STRING).description("텃밭 가격"),
                     fieldWithPath("contact").type(JsonFieldType.STRING).description("연락처이며 빈값 가능"),
-                    fieldWithPath("size").type(JsonFieldType.STRING).description("텃밭 크기"),
+                    fieldWithPath("size").type(JsonFieldType.STRING).description("텃밭 크기(m²)"),
                     fieldWithPath("gardenStatus").type(JsonFieldType.STRING).description("텃밭 상태 : ACTIVE(모집중), INACTIVE(마감)"),
                     fieldWithPath("writerId").type(JsonFieldType.NUMBER).description("작성자 아이디"),
                     fieldWithPath("recruitStartDate").type(JsonFieldType.STRING).description("모집 시작일"),
@@ -163,7 +163,7 @@ class GardenRestDocsTest extends RestDocsSupport {
                     fieldWithPath("gardenFacility.isToilet").type(JsonFieldType.BOOLEAN).description("텃밭 화장실 제공 여부"),
                     fieldWithPath("gardenFacility.isWaterway").type(JsonFieldType.BOOLEAN).description("텃밭 수로 제공 여부"),
                     fieldWithPath("gardenFacility.isEquipment").type(JsonFieldType.BOOLEAN).description("농기구 제공 여부"),
-                    fieldWithPath("isLiked").type(JsonFieldType.BOOLEAN).description("좋아요 여부"),
+                    fieldWithPath("gardenLikeId").type(JsonFieldType.NUMBER).description("해당 텃밭 찜하기 ID, 텃밭을 찜하지 않았다면 0을 반환하고 텃밭을 찜했다면 0보다 큰 수를 응답한다."),
                     fieldWithPath("roomId").type(JsonFieldType.NUMBER).description("해당 게시글에 대한 채팅방 아이디, 만약 채팅방이 없는 경우에는 -1L를 반환합니다.")
                 )));
     }
@@ -183,7 +183,7 @@ class GardenRestDocsTest extends RestDocsSupport {
                     fieldWithPath("recentGardenResponses[].gardenId").type(JsonFieldType.NUMBER).description("텃밭 아이디"),
                     fieldWithPath("recentGardenResponses[].latitude").type(JsonFieldType.NUMBER).description("텃밭 위도"),
                     fieldWithPath("recentGardenResponses[].longitude").type(JsonFieldType.NUMBER).description("텃밭 경도"),
-                    fieldWithPath("recentGardenResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기"),
+                    fieldWithPath("recentGardenResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기(m²)"),
                     fieldWithPath("recentGardenResponses[].gardenName").type(JsonFieldType.STRING).description("텃밭 이름"),
                     fieldWithPath("recentGardenResponses[].price").type(JsonFieldType.STRING).description("텃밭 가격"),
                     fieldWithPath("recentGardenResponses[].images").type(JsonFieldType.ARRAY).description("텃밭 이미지"),
@@ -205,7 +205,7 @@ class GardenRestDocsTest extends RestDocsSupport {
                 responseFields(
                     fieldWithPath("gardenMineResponses").type(JsonFieldType.ARRAY).description("내가 등록한 텃밭 목록"),
                     fieldWithPath("gardenMineResponses[].gardenId").type(JsonFieldType.NUMBER).description("내가 등록한 텃밭 아이디"),
-                    fieldWithPath("gardenMineResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기"),
+                    fieldWithPath("gardenMineResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기(m²)"),
                     fieldWithPath("gardenMineResponses[].gardenName").type(JsonFieldType.STRING).description("텃밭 이름"),
                     fieldWithPath("gardenMineResponses[].price").type(JsonFieldType.STRING).description("텃밭 가격"),
                     fieldWithPath("gardenMineResponses[].gardenStatus").type(JsonFieldType.STRING).description("텃밭 상태 : ACTIVE(모집중), INACTIVE(마감)"),
@@ -226,7 +226,7 @@ class GardenRestDocsTest extends RestDocsSupport {
                 responseFields(
                     fieldWithPath("gardenLikeByMemberResponses").type(JsonFieldType.ARRAY).description("내가 찜한 텃밭 목록"),
                     fieldWithPath("gardenLikeByMemberResponses[].gardenId").type(JsonFieldType.NUMBER).description("내가 찜한 텃밭 아이디"),
-                    fieldWithPath("gardenLikeByMemberResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기"),
+                    fieldWithPath("gardenLikeByMemberResponses[].size").type(JsonFieldType.STRING).description("텃밭 크기(m²)"),
                     fieldWithPath("gardenLikeByMemberResponses[].gardenName").type(JsonFieldType.STRING).description("텃밭 이름"),
                     fieldWithPath("gardenLikeByMemberResponses[].price").type(JsonFieldType.STRING).description("텃밭 가격"),
                     fieldWithPath("gardenLikeByMemberResponses[].gardenStatus").type(JsonFieldType.STRING).description("텃밭 상태 : ACTIVE(모집중), INACTIVE(마감)"),

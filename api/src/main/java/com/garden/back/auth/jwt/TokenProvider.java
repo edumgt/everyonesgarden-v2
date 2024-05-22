@@ -44,44 +44,45 @@ public class TokenProvider {
         long now = (new Date().getTime());
 
         Date accessTokenExpiredDate = new Date(now + jwtProperties.getAccessTokenExpireTime());
+        return getTokenResponse(now, accessTokenExpiredDate, member);
+    }
+
+    public TokenResponse generateTokenDto(String refreshTokenKey) {
+        long now = (new Date().getTime());
+        Date accessTokenExpiredDate = new Date(now + jwtProperties.getAccessTokenExpireTime());
+
+        RefreshToken refreshToken = refreshTokenRepository.findByKey(refreshTokenKey)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰 입니다."));
+        Member member = refreshToken.member();
+
+        return getTokenResponse(now, accessTokenExpiredDate, member);
+    }
+
+    private TokenResponse getTokenResponse(long now, Date accessTokenExpiredDate, Member member) {
         String accessToken = Jwts.builder()
-                .setSubject(String.valueOf(member.getId()))
-                .claim(jwtProperties.getAuthorityKey(), member.getRole().toString())
-                .setExpiration(accessTokenExpiredDate)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            .setSubject(String.valueOf(member.getId()))
+            .claim(jwtProperties.getAuthorityKey(), member.getRole().toString())
+            .setExpiration(accessTokenExpiredDate)
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
 
         Date refreshTokenExpiredDate = new Date(now + jwtProperties.getRefreshTokenExpireTime());
-        String refreshToken = Jwts.builder()
+        String newRefreshToken = Jwts.builder()
                 .setExpiration(refreshTokenExpiredDate)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        RefreshToken refreshTokenObject = new RefreshToken(refreshToken, member, refreshTokenExpiredDate);
+        RefreshToken refreshTokenObject = new RefreshToken(newRefreshToken, member, refreshTokenExpiredDate);
         refreshTokenRepository.save(refreshTokenObject);
 
         return new TokenResponse(
                 jwtProperties.getBearerPrefix(),
                 accessToken,
-                refreshToken,
+                newRefreshToken,
                 accessTokenExpiredDate.getTime(),
                 refreshTokenExpiredDate.getTime(),
                 member.getId()
         );
-    }
-
-    public String generateAccessToken(String refreshTokenKey) {
-        long now = (new Date().getTime());
-        RefreshToken refreshToken = refreshTokenRepository.findByKey(refreshTokenKey)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "유효하지 않은 리프레시 토큰 입니다."));
-        Member member = refreshToken.member();
-
-        return Jwts.builder()
-                .setSubject(String.valueOf(member.getId()))
-                .claim(jwtProperties.getAuthorityKey(), member.getRole().toString())
-                .setExpiration(new Date(now + jwtProperties.getAccessTokenExpireTime()))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
     }
 
     public Authentication getAuthentication(String accessToken) {
