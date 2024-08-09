@@ -4,10 +4,15 @@ import com.garden.back.garden.domain.Garden;
 import com.garden.back.garden.repository.garden.dto.GardenByName;
 import com.garden.back.garden.repository.garden.dto.GardenGetAll;
 import com.garden.back.garden.repository.garden.dto.GardensByComplexes;
+import com.garden.back.garden.repository.garden.dto.GardensByComplexesWithScroll;
 import com.garden.back.garden.repository.garden.dto.request.GardenByComplexesRepositoryRequest;
+import com.garden.back.garden.repository.garden.dto.request.GardenByComplexesWithScrollRepositoryRequest;
 import com.garden.back.garden.repository.garden.dto.response.*;
+import com.garden.back.garden.repository.garden.entity.GardenEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +22,7 @@ public interface GardenRepository {
 
     Slice<GardenGetAll> getAllGardens(Pageable pageable);
 
-    GardensByComplexes getGardensByComplexes(GardenByComplexesRepositoryRequest request);
+    GardensByComplexesWithScroll getGardensByComplexesWithScroll(GardenByComplexesWithScrollRepositoryRequest request);
 
     Garden save(Garden garden);
 
@@ -30,9 +35,9 @@ public interface GardenRepository {
 
     void deleteById(Long gardenId);
 
-    List<GardenMineRepositoryResponse> findByWriterId(Long writerId);
+    GardenMineRepositoryResponses findByWriterId(Long writerId, Long nextGardenId, Pageable pageable);
 
-    List<GardenLikeByMemberRepositoryResponse> getLikeGardenByMember(Long memberId);
+    GardenLikeByMemberRepositoryResponses getLikeGardenByMember(Long memberId, Long nextGardenId, Pageable pageable);
 
     List<GardenChatRoomInfoRepositoryResponse> getChatRoomInfo(Long gardenId);
 
@@ -41,5 +46,11 @@ public interface GardenRepository {
     Optional<GardenLocationRepositoryResponse> findGardenLocation(Long gardenId);
 
     GardenLocationRepositoryResponse getGardenLocation(Long gardenId);
+
+    GardensByComplexes getGardensByComplexes(GardenByComplexesRepositoryRequest request);
+
+    Boolean isExisted(int resourceHashId);
+
+    Garden getGardenEntity(int resourceHashId);
 
 }

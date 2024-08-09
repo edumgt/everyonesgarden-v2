@@ -37,6 +37,24 @@ public class GardenFixture {
         return new GardenAllResults(gardenAllResults, false);
     }
 
+    public static GardenByComplexesWithScrollResults gardenByComplexesWithScrollResults() {
+        Set<GardenByComplexesWithScrollResults.GardenByComplexesWithScrollResult> gardenByComplexesWithScrollResults =
+            Set.of(new GardenByComplexesWithScrollResults.GardenByComplexesWithScrollResult(
+                    1L,
+                    "100",
+                    "별이네 텃밭",
+                    "100000",
+                    List.of("www.garden.com"),
+                    GardenStatus.ACTIVE.name(),
+                    GardenType.PUBLIC.name(),
+                    37.4449168,
+                    127.1388684
+                )
+            );
+
+        return new GardenByComplexesWithScrollResults(gardenByComplexesWithScrollResults, false);
+    }
+
     public static GardenByComplexesResults gardenByComplexesResults() {
         Set<GardenByComplexesResults.GardenByComplexesResult> gardenByComplexesResults =
             Set.of(new GardenByComplexesResults.GardenByComplexesResult(
@@ -52,7 +70,7 @@ public class GardenFixture {
                 )
             );
 
-        return new GardenByComplexesResults(gardenByComplexesResults, false);
+        return new GardenByComplexesResults(gardenByComplexesResults);
     }
 
     public static GardenDetailFacadeResponse gardenDetailResult() {
@@ -72,13 +90,10 @@ public class GardenFixture {
             "2023.12.25",
             "농기구를 빌릴 수 있는 자판기가 있습니다. 작물 키우는 법도 알려드려요",
             List.of("www.garden.com"),
-            new GardenDetailResult.GardenFacility(
-                false,
-                true,
-                true
-            ),
+            "화장실 등",
             1L,
-            1L
+            1L,
+            "4567"
         );
     }
 
@@ -111,7 +126,9 @@ public class GardenFixture {
                     GardenStatus.ACTIVE.name(),
                     List.of("www.garden.com")
                 )
-            )
+            ),
+            2L,
+            false
         );
     }
 
@@ -126,7 +143,9 @@ public class GardenFixture {
                     GardenStatus.ACTIVE.name(),
                     List.of("www.garden.com")
                 )
-            )
+            ),
+            0L,
+            false
         );
     }
 
@@ -191,7 +210,9 @@ public class GardenFixture {
                     List.of("https://kr.object.ncloudstorage.com/every-garden/images/garden/background.jpg"),
                     "이번 겨울에 고구마를 심었더니 이렇게 많이 열렸어요!"
                 )
-            )
+            ),
+            0L,
+            false
         );
     }
 
@@ -248,6 +269,23 @@ public class GardenFixture {
         return new GardenLocationResult(
             34.123,
             127.123
+        );
+    }
+
+    public static OtherManagedGardenGetResults otherManagedGardenGetResults() {
+        return new OtherManagedGardenGetResults(
+            List.of(
+                new OtherManagedGardenGetResults.OtherManagedGardenGetResult(
+                    1L,
+                    "별이네 주말농장",
+                    "2023.12.01",
+                    "2023.12.31",
+                    List.of("https://kr.object.ncloudstorage.com/every-garden/images/garden/background.jpg"),
+                    "이번 겨울에 고구마를 심었더니 이렇게 많이 열렸어요!"
+                )
+            ),
+            0L,
+            false
         );
     }
 

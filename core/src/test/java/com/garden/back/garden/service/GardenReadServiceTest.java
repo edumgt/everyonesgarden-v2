@@ -9,7 +9,7 @@ import com.garden.back.garden.repository.garden.GardenRepository;
 import com.garden.back.garden.repository.gardenimage.GardenImageRepository;
 import com.garden.back.garden.repository.gardenlike.GardenLikeRepository;
 import com.garden.back.garden.repository.mymanagedgarden.MyManagedGardenRepository;
-import com.garden.back.garden.service.dto.request.GardenByComplexesParam;
+import com.garden.back.garden.service.dto.request.GardenByComplexesWithScrollParam;
 import com.garden.back.garden.service.dto.request.GardenDetailParam;
 import com.garden.back.garden.service.dto.request.GardenLikeCreateParam;
 import com.garden.back.garden.service.dto.request.GardenLikeDeleteParam;
@@ -99,17 +99,17 @@ class GardenReadServiceTest extends IntegrationTestSupport {
     @Test
     void getGardenByComplexes_withinRegions() {
         // Given
-        GardenByComplexesParam publicGardenByComplexesParam = GardenFixture.publicGardenByComplexesParam();
+        GardenByComplexesWithScrollParam publicGardenByComplexesWithScrollParam = GardenFixture.publicGardenByComplexesParam();
 
-        List<Point> points = RandomPointGenerator.generateRandomPoint(publicGardenByComplexesParam);
+        List<Point> points = RandomPointGenerator.generateRandomPoint(publicGardenByComplexesWithScrollParam);
         points.forEach(
             point -> gardenRepository.save(GardenFixture.randomPublicGardenWithinComplexes(point)));
 
         // When
-        GardenByComplexesResults gardensByComplexes = gardenReadService.getGardensByComplexes(publicGardenByComplexesParam);
+        GardenByComplexesWithScrollResults gardensByComplexes = gardenReadService.getGardensByComplexesWithScroll(publicGardenByComplexesWithScrollParam);
 
         // Then
-        assertThat(gardensByComplexes.gardenByComplexesResults().size()).isEqualTo(points.size());
+        assertThat(gardensByComplexes.gardenByComplexesWithScrollResults().size()).isEqualTo(points.size());
     }
 
     @Disabled
@@ -117,26 +117,26 @@ class GardenReadServiceTest extends IntegrationTestSupport {
     @Test
     void getGardenByComplexes_gardenType() {
         // Given
-        GardenByComplexesParam publicGardenByComplexesParam = GardenFixture.publicGardenByComplexesParam();
-        GardenByComplexesParam allGardenByComplexesParam = GardenFixture.allGardenByComplexesParam();
-        GardenByComplexesParam privateGardenByComplexesParam = GardenFixture.privateGardenByComplexesParam();
+        GardenByComplexesWithScrollParam publicGardenByComplexesWithScrollParam = GardenFixture.publicGardenByComplexesParam();
+        GardenByComplexesWithScrollParam allGardenByComplexesWithScrollParam = GardenFixture.allGardenByComplexesParam();
+        GardenByComplexesWithScrollParam privateGardenByComplexesWithScrollParam = GardenFixture.privateGardenByComplexesParam();
 
-        List<Point> points = RandomPointGenerator.generateRandomPoint(publicGardenByComplexesParam);
+        List<Point> points = RandomPointGenerator.generateRandomPoint(publicGardenByComplexesWithScrollParam);
         points.forEach(
             point -> gardenRepository.save(GardenFixture.randomPublicGardenWithinComplexes(point)));
 
         // When
-        GardenByComplexesResults publicGardensByComplexes
-            = gardenReadService.getGardensByComplexes(publicGardenByComplexesParam);
-        GardenByComplexesResults allGardensByComplexes
-            = gardenReadService.getGardensByComplexes(allGardenByComplexesParam);
-        GardenByComplexesResults privateGardensByComplexes
-            = gardenReadService.getGardensByComplexes(privateGardenByComplexesParam);
+        GardenByComplexesWithScrollResults publicGardensByComplexes
+            = gardenReadService.getGardensByComplexesWithScroll(publicGardenByComplexesWithScrollParam);
+        GardenByComplexesWithScrollResults allGardensByComplexes
+            = gardenReadService.getGardensByComplexesWithScroll(allGardenByComplexesWithScrollParam);
+        GardenByComplexesWithScrollResults privateGardensByComplexes
+            = gardenReadService.getGardensByComplexesWithScroll(privateGardenByComplexesWithScrollParam);
 
         // Then
-        assertThat(privateGardensByComplexes.gardenByComplexesResults().size()).isEqualTo(0);
-        assertThat(allGardensByComplexes.gardenByComplexesResults().size()).isEqualTo(points.size());
-        assertThat(publicGardensByComplexes.gardenByComplexesResults().size()).isEqualTo(points.size());
+        assertThat(privateGardensByComplexes.gardenByComplexesWithScrollResults().size()).isEqualTo(0);
+        assertThat(allGardensByComplexes.gardenByComplexesWithScrollResults().size()).isEqualTo(points.size());
+        assertThat(publicGardensByComplexes.gardenByComplexesWithScrollResults().size()).isEqualTo(points.size());
     }
 
     @DisplayName("텃밭을 조회할 때 텃밭 상세 내용을 확인할 수 있고 동시에 최근 본 텃밭 내역에 포함된다.")
@@ -229,7 +229,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
                 .toList();
 
         // When
-        GardenMineResults myGarden = gardenReadService.getMyGarden(savedPrivateGarden.getWriterId());
+        GardenMineResults myGarden = gardenReadService.getMyGarden(GardenFixture.myGardenGetParamAboutFirst(savedPrivateGarden.getWriterId()));
 
         // Then
         assertThat(myGarden.gardenMineResults())
@@ -243,6 +243,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
                     savedPrivateGarden.getPrice(),
                     savedPrivateGarden.getGardenStatus().name(),
                     gardenImages));
+        assertThat(myGarden.hasNext()).isFalse();
     }
 
     @DisplayName("내가 좋아요한 텃밭 게시물을 조회할 수 있다.")
@@ -259,7 +260,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
         gardenLikeRepository.save(gardenLike);
 
         // When
-        GardenLikeByMemberResults likeGardensByMember = gardenReadService.getLikeGardensByMember(gardenLike.getMemberId());
+        GardenLikeByMemberResults likeGardensByMember = gardenReadService.getLikeGardensByMember(gardenLike.getMemberId(),0L);
 
         // Then
         assertThat(likeGardensByMember.gardenLikeByMemberResults())
@@ -284,10 +285,10 @@ class GardenReadServiceTest extends IntegrationTestSupport {
 
         // When
         MyManagedGardenGetResults myManagedGardenGetResults
-            = gardenReadService.getMyManagedGardens(myManagedGarden.getMemberId());
+            = gardenReadService.getMyManagedGardens(GardenFixture.myManagedGardenGetParamAboutFirst(myManagedGarden.getMemberId()));
 
         // Then
-        assertThat(myManagedGardenGetResults.myManagedGardenGetRespons())
+        assertThat(myManagedGardenGetResults.myManagedGardenGetResponse())
             .extracting("gardenName", "images")
             .contains(
                 Tuple.tuple(
@@ -295,6 +296,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
                     List.of(myManagedGarden.getImageUrl())
                 )
             );
+        assertThat(myManagedGardenGetResults.hasNext()).isFalse();
     }
 
     @DisplayName("내가 가꾸는 텃밭을 상세하게 볼 수 있다.")
@@ -411,6 +413,29 @@ class GardenReadServiceTest extends IntegrationTestSupport {
         assertThatThrownBy(() -> gardenReadService.getGardenLocation(notExistedGardenId))
             .isInstanceOf(EmptyResultDataAccessException.class)
             .hasMessageContaining("존재하지 않는 텃밭입니다. gardenId : "+notExistedGardenId);
+    }
+
+    @DisplayName("상대방이 가꾸는 텃밭에 대한 목록을 조회할 수 있다.")
+    @Test
+    void visitOtherManagedGarden() {
+        // Given
+        MyManagedGarden myManagedGarden = myManagedGardenRepository.save(
+            GardenFixture.myManagedGarden(savedPrivateGarden.getGardenId()));
+
+        // When
+        OtherManagedGardenGetResults otherManagedGardenGetResults
+            = gardenReadService.visitOtherManagedGarden(GardenFixture.otherManagedGardenGetParamAboutFirst(myManagedGarden.getMemberId()));
+
+        // Then
+        assertThat(otherManagedGardenGetResults.otherManagedGardenGetResponse())
+            .extracting("gardenName", "images")
+            .contains(
+                Tuple.tuple(
+                    savedPrivateGarden.getGardenName(),
+                    List.of(myManagedGarden.getImageUrl())
+                )
+            );
+        assertThat(otherManagedGardenGetResults.hasNext()).isFalse();
     }
 
 }

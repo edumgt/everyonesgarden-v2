@@ -4,7 +4,9 @@ import com.garden.back.garden.domain.Garden;
 import com.garden.back.garden.repository.garden.dto.GardenByName;
 import com.garden.back.garden.repository.garden.dto.GardenGetAll;
 import com.garden.back.garden.repository.garden.dto.GardensByComplexes;
+import com.garden.back.garden.repository.garden.dto.GardensByComplexesWithScroll;
 import com.garden.back.garden.repository.garden.dto.request.GardenByComplexesRepositoryRequest;
+import com.garden.back.garden.repository.garden.dto.request.GardenByComplexesWithScrollRepositoryRequest;
 import com.garden.back.garden.repository.garden.dto.response.*;
 import com.garden.back.garden.repository.garden.entity.GardenEntity;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Repository
@@ -37,8 +40,8 @@ public class GardenRepositoryImpl implements GardenRepository {
     }
 
     @Override
-    public GardensByComplexes getGardensByComplexes(GardenByComplexesRepositoryRequest request) {
-        return gardenCustomRepository.getGardensByComplexes(request);
+    public GardensByComplexesWithScroll getGardensByComplexesWithScroll(GardenByComplexesWithScrollRepositoryRequest request) {
+        return gardenCustomRepository.getGardensByComplexesWithScroll(request);
     }
 
     @Override
@@ -65,13 +68,24 @@ public class GardenRepositoryImpl implements GardenRepository {
     }
 
     @Override
-    public List<GardenMineRepositoryResponse> findByWriterId(Long writerId) {
-        return gardenJpaRepository.findByWriterId(writerId);
+    public GardenMineRepositoryResponses findByWriterId(
+        Long writerId,
+        Long nextGardenId,
+        Pageable pageable) {
+        return GardenMineRepositoryResponses.of(
+            gardenJpaRepository.findByWriterId(writerId, nextGardenId, pageable),
+            pageable);
     }
 
     @Override
-    public List<GardenLikeByMemberRepositoryResponse> getLikeGardenByMember(Long memberId) {
-        return gardenJpaRepository.getLikeGardenByMember(memberId);
+    public GardenLikeByMemberRepositoryResponses getLikeGardenByMember(
+        Long memberId,
+        Long nextGardenId,
+        Pageable pageable) {
+        return GardenLikeByMemberRepositoryResponses.of(
+            gardenJpaRepository.getLikeGardenByMember(memberId, nextGardenId, pageable),
+            pageable
+        );
     }
 
     @Override
@@ -92,7 +106,26 @@ public class GardenRepositoryImpl implements GardenRepository {
     @Override
     public GardenLocationRepositoryResponse getGardenLocation(Long gardenId) {
         return findGardenLocation(gardenId).orElseThrow(() ->
-            new EmptyResultDataAccessException("존재하지 않는 텃밭입니다. gardenId : "+gardenId,1));
+            new EmptyResultDataAccessException("존재하지 않는 텃밭입니다. gardenId : " + gardenId, 1));
+    }
+
+    @Override
+    public GardensByComplexes getGardensByComplexes(GardenByComplexesRepositoryRequest request) {
+        return gardenCustomRepository.getGardensByComplexes(request);
+    }
+
+    @Override
+    public Boolean isExisted(int resourceHashId) {
+        return gardenJpaRepository.isExisted(resourceHashId);
+    }
+
+    @Override
+    public Garden getGardenEntity(int resourceHashId) {
+        return gardenJpaRepository.find(resourceHashId)
+            .map(GardenEntity::toModel)
+            .orElseThrow(() -> new NoSuchElementException(
+                String.format("해당 식별자 %d를 가지는 텃밭이 존재하지 않습니다.", resourceHashId)
+            ));
     }
 
 }

@@ -46,9 +46,7 @@ public class GardenFixture {
             "화장실이 깨끗하고 농기구를 빌려줍니다.",
             RECRUIT_START_DATE,
             RECRUIT_END_DATE,
-            true,
-            false,
-            true,
+            "화장실",
             1L,
             false,
             0
@@ -70,9 +68,7 @@ public class GardenFixture {
             "화장실이 깨끗하고 농기구를 빌려줍니다.",
             RECRUIT_START_DATE,
             RECRUIT_END_DATE,
-            true,
-            false,
-            true,
+            "화장실",
             1L,
             false,
             0
@@ -87,8 +83,8 @@ public class GardenFixture {
         return GardenImage.of(SECOND_GARDEN_IMAGE_URL, garden);
     }
 
-    public static GardenByComplexesParam publicGardenByComplexesParam() {
-        return new GardenByComplexesParam(
+    public static GardenByComplexesWithScrollParam publicGardenByComplexesParam() {
+        return new GardenByComplexesWithScrollParam(
             GardenType.PUBLIC.name(),
             0,
             LATITUDE,
@@ -98,8 +94,8 @@ public class GardenFixture {
         );
     }
 
-    public static GardenByComplexesParam allGardenByComplexesParam() {
-        return new GardenByComplexesParam(
+    public static GardenByComplexesWithScrollParam allGardenByComplexesParam() {
+        return new GardenByComplexesWithScrollParam(
             GardenType.ALL.name(),
             0,
             LATITUDE,
@@ -109,8 +105,8 @@ public class GardenFixture {
         );
     }
 
-    public static GardenByComplexesParam privateGardenByComplexesParam() {
-        return new GardenByComplexesParam(
+    public static GardenByComplexesWithScrollParam privateGardenByComplexesParam() {
+        return new GardenByComplexesWithScrollParam(
             GardenType.PRIVATE.name(),
             0,
             LATITUDE,
@@ -135,9 +131,7 @@ public class GardenFixture {
             "화장실이 깨끗해요 그리고 시설이 최신식입니다.",
             RECRUIT_START_DATE,
             RECRUIT_END_DATE,
-            true,
-            false,
-            true,
+            "화장실",
             null,
             false,
             0
@@ -375,4 +369,17 @@ public class GardenFixture {
     public static GardenLike gardenLike(Garden garden, Long memberId) {
         return GardenLike.of(memberId, garden);
     }
+
+    public static MyGardenGetParam myGardenGetParamAboutFirst(Long memberId) {
+        return new MyGardenGetParam(memberId, 0L);
+    }
+
+    public static MyManagedGardenGetParam myManagedGardenGetParamAboutFirst(Long memberId) {
+        return new MyManagedGardenGetParam(memberId, 0L);
+    }
+
+    public static OtherManagedGardenGetParam otherManagedGardenGetParamAboutFirst(Long memberId) {
+        return new OtherManagedGardenGetParam(memberId, 0L);
+    }
+
 }

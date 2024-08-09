@@ -1,14 +1,14 @@
 package com.garden.back.garden.controller;
 
-import com.garden.back.garden.controller.dto.request.GardenByComplexesRequest;
-import com.garden.back.garden.controller.dto.request.GardenByNameRequest;
-import com.garden.back.garden.controller.dto.request.GardenDetailRequest;
+import com.garden.back.garden.controller.dto.request.*;
 import com.garden.back.garden.controller.dto.response.*;
 import com.garden.back.garden.facade.GardenDetailFacadeResponse;
 import com.garden.back.garden.facade.GardenFacade;
 import com.garden.back.garden.service.GardenReadService;
 import com.garden.back.garden.service.dto.request.GardenByNameParam;
+import com.garden.back.garden.service.dto.request.MyManagedGardenGetParam;
 import com.garden.back.garden.service.dto.response.GardenByComplexesResults;
+import com.garden.back.garden.service.dto.response.GardenByComplexesWithScrollResults;
 import com.garden.back.global.loginuser.CurrentUser;
 import com.garden.back.global.loginuser.LoginUser;
 import com.garden.back.global.loginuser.OptionalUser;
@@ -55,10 +55,22 @@ public class GardenController {
     @GetMapping(
         path = "/by-complexes",
         produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GardenByComplexesWithScrollResponses> getGardensByComplexesWithScroll(
+        @ModelAttribute @Valid GardenByComplexesWithScrollRequest request) {
+        GardenByComplexesWithScrollResults gardensByComplexes
+            = gardenReadService.getGardensByComplexesWithScroll(request.toGardenByComplexesWithScrollParam());
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(GardenByComplexesWithScrollResponses.to(gardensByComplexes));
+    }
+
+    @GetMapping(
+        path = "/by-complexes/all",
+        produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GardenByComplexesResponses> getGardensByComplexes(
         @ModelAttribute @Valid GardenByComplexesRequest request) {
         GardenByComplexesResults gardensByComplexes
-            = gardenReadService.getGardensByComplexes(GardenByComplexesRequest.to(request));
+            = gardenReadService.getGardensByComplexes(request.toGardenByComplexesParam());
 
         return ResponseEntity.status(HttpStatus.OK)
             .body(GardenByComplexesResponses.to(gardensByComplexes));
@@ -91,21 +103,30 @@ public class GardenController {
         path = "/mine",
         produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GardenMineResponses> getMyGarden(
-        @CurrentUser LoginUser loginUser
+        @CurrentUser
+        LoginUser loginUser,
+        @RequestParam
+        @PositiveOrZero(message = "넥스트 키는 음수일 수 없습니다.")
+        Long nextGardenId
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(GardenMineResponses.to(gardenReadService.getMyGarden(loginUser.memberId())));
+            .body(GardenMineResponses.to(
+                gardenReadService.getMyGarden(
+                    MyGardenGetRequest.toMyGardenGetParam(loginUser, nextGardenId))));
     }
 
     @GetMapping(
         path = "/likes",
         produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<GardenLikeByMemberResponses> getLikeGardenByMember(
-        @CurrentUser LoginUser loginUser
+        @CurrentUser LoginUser loginUser,
+        @RequestParam
+        @PositiveOrZero(message = "넥스트 키는 음수일 수 없습니다.")
+        Long nextGardenId
     ) {
         return ResponseEntity.status(HttpStatus.OK)
             .body(GardenLikeByMemberResponses.to(
-                gardenReadService.getLikeGardensByMember(loginUser.memberId())));
+                gardenReadService.getLikeGardensByMember(loginUser.memberId(), nextGardenId)));
     }
 
     @GetMapping(
@@ -125,10 +146,15 @@ public class GardenController {
         produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<MyManagedGardenGetResponses> getMyManagedGardens(
-        @CurrentUser LoginUser loginUser
+        @CurrentUser
+        LoginUser loginUser,
+        @RequestParam
+        @PositiveOrZero(message = "넥스트 키는 음수일 수 없습니다.")
+        Long nextMyManagedGardenId
     ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(MyManagedGardenGetResponses.to(gardenReadService.getMyManagedGardens(loginUser.memberId())));
+            .body(MyManagedGardenGetResponses.to(gardenReadService.getMyManagedGardens(
+                MyManagedGardenGetRequest.toMyManagedGardenGetParam(loginUser, nextMyManagedGardenId))));
     }
 
     @GetMapping(
@@ -154,6 +180,18 @@ public class GardenController {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(GardenLocationResponse.to(gardenReadService.getGardenLocation(gardenId)));
+    }
+
+    @GetMapping(
+        value = "/other-managed",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<OtherManagedGardenGetResponses> visitOtherManagedGarden(
+        @ModelAttribute @Valid OtherManagedGardenGetRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(OtherManagedGardenGetResponses.to(gardenReadService.visitOtherManagedGarden(
+                request.toOtherManagedGardenGetParam())));
     }
 
 }

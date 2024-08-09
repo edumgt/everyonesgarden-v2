@@ -55,7 +55,8 @@ class PostRestDocsTest extends RestDocsSupport {
                                 1L,
                                 "프로필 이미지",
                                 "닉네임",
-                                MemberMannerGrade.SEED
+                                MemberMannerGrade.SEED,
+                            "email@abc.com"
                         ),
                         PostType.QUESTION,
                         LocalDate.now(),
@@ -95,6 +96,7 @@ class PostRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("postInfos[].userInfo.profile").type(STRING).description("글쓴이 프로필이미지"),
                                 fieldWithPath("postInfos[].userInfo.name").type(STRING).description("글쓴이 닉네임"),
                                 fieldWithPath("postInfos[].userInfo.memberMannerGrade").type(STRING).description("글쓴이 매너 등급"),
+                                fieldWithPath("postInfos[].userInfo.email").type(STRING).description("글쓴이 email"),
                                 fieldWithPath("postInfos[].postType").type(STRING).description("게시글 종류"),
                                 fieldWithPath("postInfos[].createdDate").type(STRING).description("생성 일"),
                                 fieldWithPath("postInfos[].isLikeClick").type(BOOLEAN).description("좋아요 클릭 여부(로그인 상태가 아니면 항상 false)")
@@ -112,7 +114,8 @@ class PostRestDocsTest extends RestDocsSupport {
                         1L,
                         "프로필 이미지",
                         "닉네임",
-                        MemberMannerGrade.SEED
+                        MemberMannerGrade.SEED,
+                    "abc@email.com"
                 ),
                 "내용",
                 "제목",
@@ -139,6 +142,7 @@ class PostRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("userInfo.profile").type(STRING).description("글쓴이 프로필이미지"),
                                 fieldWithPath("userInfo.name").type(STRING).description("글쓴이 닉네임"),
                                 fieldWithPath("userInfo.memberMannerGrade").type(STRING).description("글쓴이 매너 등급"),
+                                fieldWithPath("userInfo.email").type(STRING).description("글쓴이 email"),
                                 fieldWithPath("content").type(STRING).description("내용"),
                                 fieldWithPath("title").type(STRING).description("제목"),
                                 fieldWithPath("createdDate").type(STRING).description("생성 일"),
@@ -162,7 +166,8 @@ class PostRestDocsTest extends RestDocsSupport {
                                         1L,
                                         "프로필 이미지",
                                         "닉네임",
-                                        MemberMannerGrade.SEED
+                                        MemberMannerGrade.SEED,
+                                    "abc@email.com"
                                 ),
                                 false,
                                 List.of(
@@ -175,7 +180,8 @@ class PostRestDocsTest extends RestDocsSupport {
                                                         1L,
                                                         "프로필 이미지",
                                                         "닉네임",
-                                                        MemberMannerGrade.SEED
+                                                        MemberMannerGrade.SEED,
+                                                    "abc@email.com"
                                                 ),
                                                 false,
                                                 LocalDateTime.now()
@@ -215,6 +221,7 @@ class PostRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("mainComment[].userInfo.profile").type(STRING).description("글쓴이 프로필이미지"),
                                 fieldWithPath("mainComment[].userInfo.name").type(STRING).description("글쓴이 닉네임"),
                                 fieldWithPath("mainComment[].userInfo.memberMannerGrade").type(STRING).description("글쓴이 매너 등급"),
+                                fieldWithPath("mainComment[].userInfo.email").type(STRING).description("글쓴이 email"),
                                 fieldWithPath("mainComment[].isLikeClick").type(BOOLEAN).description("현재 로그인 사용자가 이 댓글을 좋아요 했는지 안했는지에 대한 boolean(true면 좋아요 누른 상태)"),
                                 fieldWithPath("mainComment[].createdAt").type(STRING).description("상위 댓글 작성일"),
                                 fieldWithPath("mainComment[].subComments[]").type(ARRAY).description("부모 댓글에 해당하는 자식 댓글 정보 목록"),
@@ -227,6 +234,7 @@ class PostRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("mainComment[].subComments[].userInfo.profile").type(STRING).description("글쓴이 프로필이미지"),
                                 fieldWithPath("mainComment[].subComments[].userInfo.name").type(STRING).description("글쓴이 닉네임"),
                                 fieldWithPath("mainComment[].subComments[].userInfo.memberMannerGrade").type(STRING).description("글쓴이 매너 등급"),
+                                fieldWithPath("mainComment[].subComments[].userInfo.email").type(STRING).description("글쓴이 email"),
                                 fieldWithPath("mainComment[].subComments[].isLikeClick").type(BOOLEAN).description("현재 로그인 사용자가 이 댓글을 좋아요 했는지 안했는지에 대한 boolean(true면 좋아요 누른 상태)"),
                                 fieldWithPath("mainComment[].subComments[].createdAt").type(STRING).description("하위 댓글 작성일")
                         )
@@ -484,7 +492,8 @@ class PostRestDocsTest extends RestDocsSupport {
                                         1L,
                                         "프로필 이미지",
                                         "닉네임",
-                                        MemberMannerGrade.SEED
+                                        MemberMannerGrade.SEED,
+                                    "abc@email.com"
                                 ),
                                 PostType.QUESTION,
                                 LocalDate.now(),
@@ -519,10 +528,70 @@ class PostRestDocsTest extends RestDocsSupport {
                                 fieldWithPath("postInfos[].userInfo.profile").type(STRING).description("글쓴이 프로필이미지"),
                                 fieldWithPath("postInfos[].userInfo.name").type(STRING).description("글쓴이 닉네임"),
                                 fieldWithPath("postInfos[].userInfo.memberMannerGrade").type(STRING).description("글쓴이 매너 등급"),
+                                fieldWithPath("postInfos[].userInfo.email").type(STRING).description("글쓴이 email"),
                                 fieldWithPath("postInfos[].postType").type(STRING).description("게시글 종류"),
                                 fieldWithPath("postInfos[].createdDate").type(STRING).description("생성 일"),
                                 fieldWithPath("postInfos[].isLikeClick").type(BOOLEAN).description("좋아요 클릭 여부(로그인 상태가 아니면 항상 false)")
                         )
                 ));
+    }
+
+    @DisplayName("작성자 id로 게시글 조회하기 api docs")
+    @Test
+    void findAllMyPosts() throws Exception {
+        FindAllMyPostsResponse response = new FindAllMyPostsResponse(
+            List.of(
+                new FindAllMyPostsResponse.PostInfo(
+                    1L,
+                    "제목",
+                    "이미지 url",
+                    "내용",
+                    0L,
+                    0L,
+                    new UserResponse(
+                        1L,
+                        "이름",
+                        "닉네임",
+                        MemberMannerGrade.SEED,
+                        "abc@email.com"
+                    )
+                )
+            )
+        );
+        FindAllMyPostsRequest request = new FindAllMyPostsRequest(0L, 10L);
+        given(postQueryService.findAllMyPosts(any(), any())).willReturn(response);
+
+        mockMvc.perform(get("/v1/posts/author/{authorId}", 1L)
+                .param("offset", String.valueOf(request.offset()))
+                .param("limit", String.valueOf(request.limit()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding(StandardCharsets.UTF_8))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(document("get-posts-by-author-id",
+                pathParameters(
+                    parameterWithName("authorId").description("작성자 id")
+                ),
+                queryParameters(
+                    parameterWithName("offset").description("조회를 시작할 데이터의 위치"),
+                    parameterWithName("limit").description("해당 페이지에서 조회할 데이터의 개수")
+                ),
+                responseFields(
+                    fieldWithPath("postInfos").type(ARRAY).description("게시글 정보 목록"),
+                    fieldWithPath("postInfos[].postId").type(NUMBER).description("게시글 ID"),
+                    fieldWithPath("postInfos[].title").type(STRING).description("게시글 제목"),
+                    fieldWithPath("postInfos[].preview").type(STRING).description("미리보기 이미지"),
+                    fieldWithPath("postInfos[].content").type(STRING).description("게시글 내용"),
+                    fieldWithPath("postInfos[].likesCount").type(NUMBER).description("좋아요 수"),
+                    fieldWithPath("postInfos[].commentsCount").type(NUMBER).description("댓글 수"),
+                    fieldWithPath("postInfos[].userInfo").type(OBJECT).description("작성자 정보"),
+                    fieldWithPath("postInfos[].userInfo.userId").type(NUMBER).description("작성자 ID"),
+                    fieldWithPath("postInfos[].userInfo.name").type(STRING).description("작성자 닉네임"),
+                    fieldWithPath("postInfos[].userInfo.profile").type(STRING).description("작성자 프로필 이미지"),
+                    fieldWithPath("postInfos[].userInfo.memberMannerGrade").type(STRING).description("작성자 매너 점수 등급"),
+                    fieldWithPath("postInfos[].userInfo.email").type(STRING).description("작성자 email")
+                )
+            ));
+
     }
 }
