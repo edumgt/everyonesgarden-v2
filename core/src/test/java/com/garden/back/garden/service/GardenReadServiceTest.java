@@ -9,10 +9,7 @@ import com.garden.back.garden.repository.garden.GardenRepository;
 import com.garden.back.garden.repository.gardenimage.GardenImageRepository;
 import com.garden.back.garden.repository.gardenlike.GardenLikeRepository;
 import com.garden.back.garden.repository.mymanagedgarden.MyManagedGardenRepository;
-import com.garden.back.garden.service.dto.request.GardenByComplexesWithScrollParam;
-import com.garden.back.garden.service.dto.request.GardenDetailParam;
-import com.garden.back.garden.service.dto.request.GardenLikeCreateParam;
-import com.garden.back.garden.service.dto.request.GardenLikeDeleteParam;
+import com.garden.back.garden.service.dto.request.*;
 import com.garden.back.garden.service.dto.response.*;
 import com.garden.back.garden.service.recentview.GardenHistoryManager;
 import com.garden.back.garden.service.recentview.RecentViewGarden;
@@ -177,7 +174,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
 
         Long gardenLikeIdToDelete = gardenCommandService.createGardenLike(
             new GardenLikeCreateParam(gardenDetailParam.memberId(), savedPrivateGarden.getGardenId()));
-        gardenCommandService.deleteGardenLike(new GardenLikeDeleteParam(gardenDetailParam.memberId(),gardenLikeIdToDelete));
+        gardenCommandService.deleteGardenLike(new GardenLikeDeleteParam(gardenDetailParam.memberId(), gardenLikeIdToDelete));
         Long gardenLikeId = gardenCommandService.createGardenLike(
             new GardenLikeCreateParam(gardenDetailParam.memberId(), savedPrivateGarden.getGardenId()));
 
@@ -260,7 +257,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
         gardenLikeRepository.save(gardenLike);
 
         // When
-        GardenLikeByMemberResults likeGardensByMember = gardenReadService.getLikeGardensByMember(gardenLike.getMemberId(),0L);
+        GardenLikeByMemberResults likeGardensByMember = gardenReadService.getLikeGardensByMember(gardenLike.getMemberId(), 0L);
 
         // Then
         assertThat(likeGardensByMember.gardenLikeByMemberResults())
@@ -281,7 +278,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
     void getMyManagedGardens() {
         // Given
         MyManagedGarden myManagedGarden = myManagedGardenRepository.save(
-            GardenFixture.myManagedGarden(savedPrivateGarden.getGardenId()));
+            GardenFixture.myManagedGarden());
 
         // When
         MyManagedGardenGetResults myManagedGardenGetResults
@@ -289,10 +286,10 @@ class GardenReadServiceTest extends IntegrationTestSupport {
 
         // Then
         assertThat(myManagedGardenGetResults.myManagedGardenGetResponse())
-            .extracting("gardenName", "images")
+            .extracting("myManagedGardenName", "images")
             .contains(
                 Tuple.tuple(
-                    savedPrivateGarden.getGardenName(),
+                    myManagedGarden.getMyManagedGardenName(),
                     List.of(myManagedGarden.getImageUrl())
                 )
             );
@@ -304,16 +301,15 @@ class GardenReadServiceTest extends IntegrationTestSupport {
     void getDetailMyManagedGarden() {
         // Given
         MyManagedGarden myManagedGarden = myManagedGardenRepository.save(
-            GardenFixture.myManagedGarden(savedPrivateGarden.getGardenId()));
+            GardenFixture.myManagedGarden());
 
         // When
         MyManagedGardenDetailResult myManagedGardenDetailResult
             = gardenReadService.getDetailMyManagedGarden(myManagedGarden.getMyManagedGardenId());
-        Garden garden = gardenRepository.getById(myManagedGarden.getGardenId());
 
         // Then
-        assertThat(myManagedGardenDetailResult.gardenName()).isEqualTo(garden.getGardenName());
-        assertThat(myManagedGardenDetailResult.address()).isEqualTo(garden.getAddress());
+        assertThat(myManagedGardenDetailResult.myManagedGardenName())
+            .isEqualTo(myManagedGarden.getMyManagedGardenName());
         assertThat(myManagedGardenDetailResult.imageUrl()).isEqualTo(myManagedGarden.getImageUrl());
     }
 
@@ -402,7 +398,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
     @Test
     void getGardenLocation_returnLatitudeAndLongitude() {
         // Given
-        Long notExistedGardenId = savedPrivateGarden.getGardenId()+100L;
+        Long notExistedGardenId = savedPrivateGarden.getGardenId() + 100L;
 
         // When
         GardenLocationResult gardenLocation = gardenReadService.getGardenLocation(savedPrivateGarden.getGardenId());
@@ -412,7 +408,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
         assertThat(gardenLocation.longitude()).isEqualTo(savedPrivateGarden.getLongitude());
         assertThatThrownBy(() -> gardenReadService.getGardenLocation(notExistedGardenId))
             .isInstanceOf(EmptyResultDataAccessException.class)
-            .hasMessageContaining("존재하지 않는 텃밭입니다. gardenId : "+notExistedGardenId);
+            .hasMessageContaining("존재하지 않는 텃밭입니다. gardenId : " + notExistedGardenId);
     }
 
     @DisplayName("상대방이 가꾸는 텃밭에 대한 목록을 조회할 수 있다.")
@@ -420,7 +416,7 @@ class GardenReadServiceTest extends IntegrationTestSupport {
     void visitOtherManagedGarden() {
         // Given
         MyManagedGarden myManagedGarden = myManagedGardenRepository.save(
-            GardenFixture.myManagedGarden(savedPrivateGarden.getGardenId()));
+            GardenFixture.myManagedGarden());
 
         // When
         OtherManagedGardenGetResults otherManagedGardenGetResults
@@ -428,14 +424,53 @@ class GardenReadServiceTest extends IntegrationTestSupport {
 
         // Then
         assertThat(otherManagedGardenGetResults.otherManagedGardenGetResponse())
-            .extracting("gardenName", "images")
+            .extracting("myManagedGardenName", "images")
             .contains(
                 Tuple.tuple(
-                    savedPrivateGarden.getGardenName(),
+                    myManagedGarden.getMyManagedGardenName(),
                     List.of(myManagedGarden.getImageUrl())
                 )
             );
         assertThat(otherManagedGardenGetResults.hasNext()).isFalse();
     }
+
+    @DisplayName("로그인 하지 않은 사용자는 상대방의 분양하는 텃밭 목록을 조회할 수 있다.")
+    @Test
+    void visitOtherGarden() {
+        // Given
+        OtherGardenGetParam otherGardenGetParam = GardenFixture.otherGardenGetParam(savedPrivateGarden.getWriterId());
+
+        // When
+        OtherGardenGetResults otherGardenGetResults = gardenReadService.visitOtherGarden(otherGardenGetParam);
+
+        // Then
+        assertThat(otherGardenGetResults.otherGardenGetResponse())
+            .extracting("isLiked")
+            .contains(false);
+        assertThat(otherGardenGetResults.hasNext()).isFalse();
+    }
+
+    @DisplayName("로그인 한 사용자는 상대방의 분양하는 텃밭 목록을 조회할 수 있다.")
+    @Test
+    void visitOtherGardenWithLoginUser() {
+        // Given
+        OtherGardenGetParam otherGardenGetParam = GardenFixture.otherGardenGetParamWithLoginUser(savedPrivateGarden.getWriterId());
+        gardenLikeRepository.save(GardenLikeFixture.gardenLikeToVisit(savedPrivateGarden));
+
+        // When
+        OtherGardenGetResults otherGardenGetResults = gardenReadService.visitOtherGarden(otherGardenGetParam);
+        OtherGardenGetResults.OtherGardenGetResult result = otherGardenGetResults.otherGardenGetResponse().get(0);
+
+        // Then
+        assertThat(otherGardenGetResults.otherGardenGetResponse())
+            .extracting("isLiked")
+            .contains(true);
+        assertThat(otherGardenGetResults.hasNext()).isFalse();
+        assertThat(result.gardenId()).isEqualTo(savedPrivateGarden.getGardenId());
+        assertThat(result.gardenName()).isEqualTo(savedPrivateGarden.getGardenName());
+        assertThat(result.gardenStatus()).isEqualTo(savedPrivateGarden.getGardenStatus());
+        assertThat(result.price()).isEqualTo(savedPrivateGarden.getPrice());
+    }
+
 
 }

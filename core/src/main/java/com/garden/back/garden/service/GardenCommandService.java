@@ -99,8 +99,10 @@ public class GardenCommandService {
     }
 
     private void saveNewGardenImages(Garden garden, List<MultipartFile> newImage) {
-        List<String> uploadImageUrls = parallelImageUploader.upload(GARDEN_IMAGE_DIRECTORY, newImage);
-        uploadImageUrls.forEach(uploadImageUrl -> gardenImageRepository.save(GardenImage.of(uploadImageUrl, garden)));
+        if (!newImage.isEmpty()) {
+            List<String> uploadImageUrls = parallelImageUploader.upload(GARDEN_IMAGE_DIRECTORY, newImage);
+            uploadImageUrls.forEach(uploadImageUrl -> gardenImageRepository.save(GardenImage.of(uploadImageUrl, garden)));
+        }
     }
 
     @Transactional
@@ -111,9 +113,7 @@ public class GardenCommandService {
     @Transactional
     public Long createMyManagedGarden(MyManagedGardenCreateParam param) {
         String uploadImageUrls = uploadGardenImage(param.myManagedGardenImage());
-        MyManagedGardenCreateDomainRequest myManagedGardenCreateDomainRequest = MyManagedGardenCreateParam.to(
-            param,
-            uploadImageUrls);
+        MyManagedGardenCreateDomainRequest myManagedGardenCreateDomainRequest = param.to(uploadImageUrls);
         MyManagedGarden savedMyManagedGarden = myManagedGardenRepository.save(
             MyManagedGarden.to(myManagedGardenCreateDomainRequest));
 
@@ -123,13 +123,15 @@ public class GardenCommandService {
     @Transactional
     public Long updateMyManagedGarden(MyManagedGardenUpdateParam param) {
         MyManagedGarden myManagedGarden = myManagedGardenRepository.getById(param.myManagedGardenId());
+        String uploadImageUrls = myManagedGarden.getImageUrl();
 
-        deleteGardenImage(myManagedGarden.getImageUrl());
-        String uploadImageUrls = uploadGardenImage(param.myManagedGardenImage());
+        if (param.myManagedGardenImage().isPresent()) {
+            deleteGardenImage(myManagedGarden.getImageUrl());
+            uploadImageUrls = uploadGardenImage(param.myManagedGardenImage().get());
+        }
 
         myManagedGarden.update(param.toMyManagedGardenUpdateDomainRequest(uploadImageUrls));
         myManagedGardenRepository.save(myManagedGarden);
-
         return myManagedGarden.getMyManagedGardenId();
     }
 

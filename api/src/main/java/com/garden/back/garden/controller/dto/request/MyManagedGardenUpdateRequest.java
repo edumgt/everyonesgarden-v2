@@ -3,55 +3,48 @@ package com.garden.back.garden.controller.dto.request;
 import com.garden.back.garden.controller.dto.request.validation.ValidDate;
 import com.garden.back.garden.service.dto.request.MyManagedGardenUpdateParam;
 import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public record MyManagedGardenUpdateRequest(
-    @Positive
-    Long gardenId,
+    @NotBlank(message = "텃밭 이름은 NULL이거나 빈값일 수 없습니다.")
+    String myManagedGardenName,
 
     @ValidDate
-    String useStartDate,
-
-    @ValidDate
-    String useEndDate,
+    String createdAt,
 
     String description
 ) {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-
-    @AssertTrue(message = "사용 시작일은 사용 종료일보다 이후일 수 없습니다.")
-    public boolean validateUseDate(String useStartDate, String useEndDate) {
-        return isBeforeStartDateThanEndDate(useStartDate, useEndDate);
-    }
-
-    private boolean isBeforeStartDateThanEndDate(String startDate, String endDate) {
-        return LocalDate.parse(startDate, DATE_FORMATTER).isBefore(LocalDate.parse(endDate, DATE_FORMATTER));
-    }
 
     public MyManagedGardenUpdateParam toMyManagedGardenUpdateParam(
         Long myManagedGardenId,
         MultipartFile newImage,
         Long memberId
     ) {
-        if (newImage == null ) {
-            newImage = (MultipartFile) Collections.emptyList();
-        }
-
         return new MyManagedGardenUpdateParam(
-            newImage,
+            myManagedGardenName,
+            getNewFile(newImage),
             myManagedGardenId,
-            gardenId,
-            LocalDate.parse(useStartDate, DATE_FORMATTER),
-            LocalDate.parse(useEndDate, DATE_FORMATTER),
+            LocalDate.parse(createdAt, DATE_FORMATTER),
             memberId,
             isNull(description)
         );
 
+    }
+
+    private static Optional<MultipartFile> getNewFile(MultipartFile file) {
+        if (file == null || file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(file);
     }
 
     private static String isNull(String field) {

@@ -77,13 +77,11 @@ public record GardenUpdateRequest(
         GardenUpdateRequest gardenUpdateRequest,
         Long memberId
     ) {
-        if (newGardenImages == null || newGardenImages.isEmpty()) {
-            throw new IllegalArgumentException("텃밭에 등록하는 사진은 빈 값일 수 없습니다. 최소 한 장이상의 사진을 등록해주세요");
-        }
+
         return new GardenUpdateParam(
             gardenId,
             gardenUpdateRequest.remainGardenImageUrls,
-            newGardenImages,
+            getNewImages(newGardenImages),
             gardenUpdateRequest.gardenName(),
             gardenUpdateRequest.price(),
             gardenUpdateRequest.size(),
@@ -107,5 +105,20 @@ public record GardenUpdateRequest(
 
     private static String isNull(String field) {
         return field == null ? "" : field;
+    }
+
+    private static List<MultipartFile> getNewImages(List<MultipartFile> newGardenImages) {
+        if (newGardenImages == null || newGardenImages.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        if (newGardenImages.size() == 1 && isFileEmpty(newGardenImages.get(0))) {
+            return Collections.emptyList();
+        }
+        return newGardenImages;
+    }
+
+    private static boolean isFileEmpty(MultipartFile file) {
+        return file == null || file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty();
     }
 }

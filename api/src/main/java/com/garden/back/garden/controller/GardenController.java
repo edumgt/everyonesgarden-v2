@@ -2,11 +2,10 @@ package com.garden.back.garden.controller;
 
 import com.garden.back.garden.controller.dto.request.*;
 import com.garden.back.garden.controller.dto.response.*;
-import com.garden.back.garden.facade.GardenDetailFacadeResponse;
+import com.garden.back.garden.facade.dto.GardenDetailFacadeResponse;
 import com.garden.back.garden.facade.GardenFacade;
 import com.garden.back.garden.service.GardenReadService;
 import com.garden.back.garden.service.dto.request.GardenByNameParam;
-import com.garden.back.garden.service.dto.request.MyManagedGardenGetParam;
 import com.garden.back.garden.service.dto.response.GardenByComplexesResults;
 import com.garden.back.garden.service.dto.response.GardenByComplexesWithScrollResults;
 import com.garden.back.global.loginuser.CurrentUser;
@@ -192,6 +191,19 @@ public class GardenController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(OtherManagedGardenGetResponses.to(gardenReadService.visitOtherManagedGarden(
                 request.toOtherManagedGardenGetParam())));
+    }
+
+    @GetMapping(
+        value = "/other",
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<OtherGardenGetResponses> visitOtherGarden(
+        @ModelAttribute @Valid OtherGardenGetRequest request,
+        @OptionalUser LoginUser loginUser
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(OtherGardenGetResponses.to(gardenFacade.visitOtherGarden(
+                request.toOtherGardenGetParam(loginUser.memberId()))));
     }
 
 }

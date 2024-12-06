@@ -2,8 +2,9 @@ package com.garden.back.docs.garden;
 
 import com.garden.back.docs.RestDocsSupport;
 import com.garden.back.garden.controller.GardenController;
-import com.garden.back.garden.facade.GardenDetailFacadeResponse;
+import com.garden.back.garden.facade.dto.GardenDetailFacadeResponse;
 import com.garden.back.garden.facade.GardenFacade;
+import com.garden.back.garden.facade.dto.OtherGardenGetFacadeResponses;
 import com.garden.back.garden.service.GardenReadService;
 import com.garden.back.garden.service.dto.response.*;
 import org.junit.jupiter.api.DisplayName;
@@ -299,9 +300,8 @@ class GardenRestDocsTest extends RestDocsSupport {
                 responseFields(
                     fieldWithPath("myManagedGardenGetResponses").type(JsonFieldType.ARRAY).description("내가 가꾸는 텃밭 목록"),
                     fieldWithPath("myManagedGardenGetResponses[].myManagedGardenId").type(JsonFieldType.NUMBER).description("내가 가꾸는 텃밭 아이디"),
-                    fieldWithPath("myManagedGardenGetResponses[].gardenName").type(JsonFieldType.STRING).description("가꾸는 텃밭의 농장 이름"),
-                    fieldWithPath("myManagedGardenGetResponses[].useStartDate").type(JsonFieldType.STRING).description("텃밭 사용 시작일"),
-                    fieldWithPath("myManagedGardenGetResponses[].useEndDate").type(JsonFieldType.STRING).description("텃밭 사용 종료일"),
+                    fieldWithPath("myManagedGardenGetResponses[].myManagedGardenName").type(JsonFieldType.STRING).description("가꾸는 텃밭의 농장 이름"),
+                    fieldWithPath("myManagedGardenGetResponses[].createdAt").type(JsonFieldType.STRING).description("텃밭 일기 등록일"),
                     fieldWithPath("myManagedGardenGetResponses[].images").type(JsonFieldType.ARRAY).description("가꾸는 텃밭 대표 이미지 url"),
                     fieldWithPath("myManagedGardenGetResponses[].description").type(JsonFieldType.STRING).description("내가 가꾸는 텃밭 자랑할 만한 내용 또는 기록"),
                     fieldWithPath("nextMyManagedGardenId").type(JsonFieldType.NUMBER).description("내가 가꾸는 텃밭 넥스트 키"),
@@ -325,10 +325,8 @@ class GardenRestDocsTest extends RestDocsSupport {
                 ),
                 responseFields(
                     fieldWithPath("myManagedGardenId").type(JsonFieldType.NUMBER).description("내가 가꾸는 텃밭 아이디"),
-                    fieldWithPath("gardenName").type(JsonFieldType.STRING).description("분양받은 텃밭의 이름"),
-                    fieldWithPath("address").type(JsonFieldType.STRING).description("분양받은 텃밭의 주소"),
-                    fieldWithPath("useStartDate").type(JsonFieldType.STRING).description("텃밭 사용 시작일"),
-                    fieldWithPath("useEndDate").type(JsonFieldType.STRING).description("텃밭 사용 종료일"),
+                    fieldWithPath("myManagedGardenName").type(JsonFieldType.STRING).description("분양받은 텃밭의 이름"),
+                    fieldWithPath("createdAt").type(JsonFieldType.STRING).description("텃밭 사용 시작일"),
                     fieldWithPath("images").type(JsonFieldType.ARRAY).description("가꾸는 텃밭 대표 이미지 url"),
                     fieldWithPath("description").type(JsonFieldType.STRING).description("내가 가꾸는 텃밭 자랑할 만한 내용 또는 기록")
                 )));
@@ -402,12 +400,42 @@ class GardenRestDocsTest extends RestDocsSupport {
                 responseFields(
                     fieldWithPath("otherManagedGardenGetResponses").type(JsonFieldType.ARRAY).description("상대방이 가꾸는 텃밭 목록"),
                     fieldWithPath("otherManagedGardenGetResponses[].myManagedGardenId").type(JsonFieldType.NUMBER).description("상대방의 가꾸는 텃밭 아이디"),
-                    fieldWithPath("otherManagedGardenGetResponses[].gardenName").type(JsonFieldType.STRING).description("가꾸는 텃밭의 농장 이름"),
-                    fieldWithPath("otherManagedGardenGetResponses[].useStartDate").type(JsonFieldType.STRING).description("텃밭 사용 시작일"),
-                    fieldWithPath("otherManagedGardenGetResponses[].useEndDate").type(JsonFieldType.STRING).description("텃밭 사용 종료일"),
+                    fieldWithPath("otherManagedGardenGetResponses[].myManagedGardenName").type(JsonFieldType.STRING).description("가꾸는 텃밭의 농장 이름"),
+                    fieldWithPath("otherManagedGardenGetResponses[].createdAt").type(JsonFieldType.STRING).description("텃밭 일기 작성일"),
                     fieldWithPath("otherManagedGardenGetResponses[].images").type(JsonFieldType.ARRAY).description("가꾸는 텃밭 대표 이미지 url"),
                     fieldWithPath("otherManagedGardenGetResponses[].description").type(JsonFieldType.STRING).description("상대방이 가꾸는 텃밭 자랑할 만한 내용 또는 기록"),
                     fieldWithPath("nextManagedGardenId").type(JsonFieldType.NUMBER).description("상대방이 가꾸는 텃밭 넥스트 키"),
+                    fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부")
+                )));
+    }
+
+    @DisplayName("상대방이 분양하는 텃밭 목록을 조회할 수 있다.")
+    @Test
+    void visitOtherGardens() throws Exception {
+        OtherGardenGetFacadeResponses result = GardenFixture.otherGardenGetFacadeResponses();
+        given(gardenFacade.visitOtherGarden(any())).willReturn(result);
+
+        mockMvc.perform(get("/v2/gardens/other")
+                .param("otherMemberIdToVisit", "1")
+                .param("nextManagedGardenId", "0"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andDo(document("visit-other-gardens",
+                queryParameters(
+                    parameterWithName("otherMemberIdToVisit").description("방문하고자 하는 상대의 Member Id, 0이거나 음수일 수 없습니다."),
+                    parameterWithName("nextManagedGardenId").description("상대방이 가꾸는 텃밭 넥스트 키 , 처음에는 다음 텃밭 키를 모르기 때문에 0을 보내주세요")
+                ),
+                responseFields(
+                    fieldWithPath("otherGardenGetResponse").type(JsonFieldType.ARRAY).description("상대방이 분양하는 텃밭 목록"),
+                    fieldWithPath("otherGardenGetResponse[].gardenId").type(JsonFieldType.NUMBER).description("상대방이 분양하는 텃밭 아이디"),
+                    fieldWithPath("otherGardenGetResponse[].gardenName").type(JsonFieldType.STRING).description("분양하는 텃밭의 농장 이름"),
+                    fieldWithPath("otherGardenGetResponse[].price").type(JsonFieldType.STRING).description("가격"),
+                    fieldWithPath("otherGardenGetResponse[].contact").type(JsonFieldType.STRING).description("연락처"),
+                    fieldWithPath("otherGardenGetResponse[].gardenStatus").type(JsonFieldType.STRING).description("텃밭 상태"),
+                    fieldWithPath("otherGardenGetResponse[].images").type(JsonFieldType.ARRAY).description("가꾸는 텃밭 대표 이미지 url"),
+                    fieldWithPath("otherGardenGetResponse[].chatRoomId").type(JsonFieldType.NUMBER).description("해당 게시글에 대한 채팅방 아이디, 만약에 존재하지 않으면 -1L을 반환"),
+                    fieldWithPath("otherGardenGetResponse[].isLiked").type(JsonFieldType.BOOLEAN).description("내가 좋아요 했는지 여부"),
+                    fieldWithPath("nextGardenId").type(JsonFieldType.NUMBER).description("상대방이 분양하는 텃밭 넥스트 키"),
                     fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 존재 여부")
                 )));
     }

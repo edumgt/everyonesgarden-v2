@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class GardenFixture {
     private static final String FIRST_GARDEN_IMAGE_URL = "https://kr.object.ncloudstorage.com/every-garden/images/garden/background.jpg";
@@ -305,10 +306,9 @@ public class GardenFixture {
         MultipartFile multipartFile = new MockMultipartFile("test", expectedUrl.getBytes());
 
         return new MyManagedGardenCreateParam(
+            "김벼루텃밭",
             multipartFile,
-            1L,
             USE_START_DATE,
-            USE_END_DATE,
             1L,
             "배추를 심었어요"
         );
@@ -316,10 +316,9 @@ public class GardenFixture {
 
     public static MyManagedGardenCreateParam myManagedGardenCreateParamWithoutImage() {
         return new MyManagedGardenCreateParam(
+            "김벼루텃밭",
             null,
-            1L,
             USE_START_DATE,
-            USE_END_DATE,
             1L,
             "배추를 심었어요"
         );
@@ -327,42 +326,37 @@ public class GardenFixture {
 
     public static MyManagedGardenUpdateParam myManagedGardenUpdateParam(
         String expectedUrl,
-        Long gardenId,
         Long myManagedGardenId) {
         MultipartFile multipartFile = new MockMultipartFile("test", expectedUrl.getBytes());
 
         return new MyManagedGardenUpdateParam(
-            multipartFile,
+            "김별텃밭",
+            Optional.of(multipartFile),
             myManagedGardenId,
-            gardenId,
             USE_START_DATE,
-            USE_END_DATE,
             1L,
             "배추를 심었어요"
         );
     }
 
     public static MyManagedGardenUpdateParam myManagedGardenUpdateParamWithoutImage(
-        Long gardenId,
         Long myManagedGardenId) {
         return new MyManagedGardenUpdateParam(
-            null,
+            "김별텃밭",
+            Optional.empty(),
             myManagedGardenId,
-            gardenId,
             USE_START_DATE,
-            USE_END_DATE,
             1L,
             "배추를 심었어요"
         );
     }
 
-    public static MyManagedGarden myManagedGarden(Long gardenId) {
+    public static MyManagedGarden myManagedGarden() {
         return MyManagedGarden.of(
+            "김벼루텃밭",
             USE_START_DATE,
-            USE_END_DATE,
             1L,
-            "https://kr.object.ncloudstorage.com/every-garden/images/garden/background.jpg",
-            gardenId
+            "https://kr.object.ncloudstorage.com/every-garden/images/garden/background.jpg"
         );
     }
 
@@ -380,6 +374,14 @@ public class GardenFixture {
 
     public static OtherManagedGardenGetParam otherManagedGardenGetParamAboutFirst(Long memberId) {
         return new OtherManagedGardenGetParam(memberId, 0L);
+    }
+
+    public static OtherGardenGetParam otherGardenGetParam(Long otherMemberId) {
+        return new OtherGardenGetParam(otherMemberId, 0L, -1L);
+    }
+
+    public static OtherGardenGetParam otherGardenGetParamWithLoginUser(Long otherMemberId) {
+        return new OtherGardenGetParam(otherMemberId, 0L, otherMemberId + 1);
     }
 
 }

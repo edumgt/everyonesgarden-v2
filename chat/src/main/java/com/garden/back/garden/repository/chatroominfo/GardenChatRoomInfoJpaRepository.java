@@ -17,7 +17,8 @@ public interface GardenChatRoomInfoJpaRepository extends JpaRepository<GardenCha
                  select cri
                  from GardenChatRoomInfo as cri
                  where cri.postId = :#{#param.postId}
-                   and cri.memberId = :#{#param.writerId}
+                   and cri.isWriter = false
+                   and cri.memberId = :#{#param.viewerId}
         ) then true else false end
         """)
     boolean existsByParams(@Param("param") ChatRoomCreateRepositoryParam param);
@@ -59,5 +60,14 @@ public interface GardenChatRoomInfoJpaRepository extends JpaRepository<GardenCha
             """
     )
     Optional<Long> findChatRoomId(@Param("memberId") Long memberId, @Param("postId") Long postId);
+
+    @Query(
+        """
+            select count(*)
+            from GardenChatRoomInfo as gri
+            where gri.chatRoom.chatRoomId =:chatRoomId and gri.isDeleted = true
+            """
+    )
+    int getSizeExitedChatRoomMember(@Param("chatRoomId") Long chatRoomId);
 
 }

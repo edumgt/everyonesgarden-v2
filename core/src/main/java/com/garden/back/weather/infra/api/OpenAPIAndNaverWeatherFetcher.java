@@ -1,5 +1,6 @@
 package com.garden.back.weather.infra.api;
 
+import com.garden.back.global.cache.FallbackResponse;
 import com.garden.back.weather.infra.WeatherFetcher;
 import com.garden.back.weather.infra.api.naver.NaverGeoClient;
 import com.garden.back.weather.infra.api.open.OpenAPIClient;
@@ -11,8 +12,13 @@ import com.garden.back.weather.infra.api.open.response.WeekWeatherResponse;
 import com.garden.back.weather.infra.response.AllRegionsWeatherInfo;
 import com.garden.back.weather.infra.response.WeatherPerHourAndTomorrowInfo;
 import com.garden.back.weather.infra.response.WeekWeatherInfo;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.util.Pair;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
@@ -22,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
+@FallbackResponse
 public non-sealed class OpenAPIAndNaverWeatherFetcher extends NaverAndOpenAPISupport implements WeatherFetcher {
 
     @Value("${api.weather.secret}")
@@ -55,6 +62,7 @@ public non-sealed class OpenAPIAndNaverWeatherFetcher extends NaverAndOpenAPISup
      워밍업 고려 어플리케이션 처음 켰을 때 많이 느림
      */
     @Override
+    @Cacheable(value = "allRegionsWeatherInfo")
     public List<AllRegionsWeatherInfo> getAllRegionsWeatherInfo() {
         String forecastDateTime = super.getNearestForecastDateTime(ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime());
 
@@ -71,9 +79,9 @@ public non-sealed class OpenAPIAndNaverWeatherFetcher extends NaverAndOpenAPISup
             .toList();
     }
 
-    /*
-    * 2일 뒤 날씨부터 6일 뒤 날씨까지 제공하는 api
-    * */
+    /**
+     * 2일 뒤 날씨부터 6일 뒤 날씨까지 제공하는 api
+     */
     @Override
     public WeekWeatherInfo getWeekWeatherInfo(String longitude, String latitude) {
         //주간 예보 발표 시간에 맞춰 baseDate를 오늘로 할지 내일로 할지 결정
@@ -91,7 +99,6 @@ public non-sealed class OpenAPIAndNaverWeatherFetcher extends NaverAndOpenAPISup
     * */
     @Override
     public WeatherPerHourAndTomorrowInfo getWeatherPerHourAndTomorrowInfo(String longitude, String latitude) {
-
         String regionName = naverGeoClient.getGeoInfoByLongitudeAndLatitude(longitude + "," + latitude, "JSON", naverApiId, naverApiSecret).results().get(0).region().area1().name();
 
         //현재 시간 이후의 매 정시 날씨를 조회하기 위한 시간 값
@@ -123,4 +130,21 @@ public non-sealed class OpenAPIAndNaverWeatherFetcher extends NaverAndOpenAPISup
         return WeatherPerHourAndTomorrowInfo.from(selectedItems, regionName);
     }
 
+    @CacheEvict(value = "allRegionsWeatherInfo", allEntries = true)
+    public void evictAllRegionsWeatherInfo() {
+    }
+
+    @Slf4j
+    @Component
+    @RequiredArgsConstructor
+    static class Scheduler {
+        public static final String EVERY_1_HOUR = "0 0 * * * *";
+        private final OpenAPIAndNaverWeatherFetcher openAPIAndNaverWeatherFetcher;
+
+        @Scheduled(cron = EVERY_1_HOUR)
+        public void evictAllRegionsWeatherInfo() {
+            log.info("전국 날씨정보 불러오는 캐시 삭제: {}", openAPIAndNaverWeatherFetcher.getAllRegionsWeatherInfo());
+            openAPIAndNaverWeatherFetcher.evictAllRegionsWeatherInfo();
+        }
+    }
 }
